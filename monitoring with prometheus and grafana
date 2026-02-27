@@ -5,3 +5,26 @@
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4
 chmod 700 get_helm.sh
 ./get_helm.sh
+
+
+                           # After the completion of Helm Setup, we will add the helm repository in  Helm charts by the following command
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+#the command to the the repo lists in helm
+helm repo list
+#to update the repository where the helml charts are present
+helm repo update
+
+#after this is all we will make the namespace 
+kubetcl create ns monitoring
+
+#we will install and setting ups over prometheus and grafana with the following command
+helm install prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --set prometheus.service.nodePort=30000 --set grafana.service.nodePort=31000 --set grafana.service.type=NodePort --set prometheus.service.type=NodePort
+
+#after the port-forwarding of the both services, we will access over prometheus and grafana
+ kubectl get port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090 -n monitoring
+ kubectl port-forward svc/prometheus-stack-grafana 3000:80 -n monitoring &
+
+
+to get grafana username and password
+ kubectl get secret --namespace monitoring -l app.kubernetes.io/component=admin-secret -o jsonpath="{.items[0].data.admin-password}" | base64 --decode ; echo
